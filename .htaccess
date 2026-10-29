@@ -1,0 +1,37 @@
+# Safe fallback for shared hosts where the domain points to this project root
+# instead of Laravel's public/ directory.
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Expose only image files from Laravel's public disk. Rewriting directly to
+    # storage/app/public also works on shared hosts where public/storage symlinks
+    # are disabled or unavailable.
+    RewriteRule ^storage/((?:[A-Za-z0-9_-]+/)*[A-Za-z0-9_-][A-Za-z0-9_.-]*\.(?:png|jpe?g|webp|gif|svg|ico))$ storage/app/public/$1 [END,NC]
+
+    # Font Awesome is stored under public/vendor. Expose only its stylesheet and
+    # font files; keep the application's private root vendor directory blocked.
+    RewriteRule ^vendor/fontawesome/(css/[A-Za-z0-9_.-]+\.css|webfonts/[A-Za-z0-9_.-]+\.(?:woff2?|ttf|otf|eot))$ public/vendor/fontawesome/$1 [END,NC]
+
+    # Keep application source, environment files, dependencies and logs private.
+    RewriteRule ^(?:app|bootstrap|config|database|resources|routes|storage|tests|vendor|node_modules|laravel10-tmp)(?:/|$) - [F,L,NC]
+    RewriteRule ^(?:\.env|\.git|composer\.(?:json|lock)|artisan|phpunit\.xml|package(?:-lock)?\.json|vite\.config\.js|tailwind\.config\.cjs|DEPLOYMENT\.md|hosting-deploy\.php)$ - [F,L,NC]
+    RewriteRule (^|/)\. - [F,L]
+
+    # Prevent a public/public URL if public/ is reached directly.
+    RewriteCond %{THE_REQUEST} \s/+public(?:/[^\s?]*)? [NC]
+    RewriteRule ^public/?(.*)$ /$1 [R=302,L]
+
+    # Serve every asset and Laravel request through the public directory.
+    RewriteCond %{REQUEST_URI} !^/public(?:/|$) [NC]
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
+<IfModule mod_mime.c>
+    AddType font/woff2 .woff2
+    AddType font/woff .woff
+    AddType font/ttf .ttf
+    AddType font/otf .otf
+    AddType application/vnd.ms-fontobject .eot
+</IfModule>

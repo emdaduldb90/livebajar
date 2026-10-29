@@ -1,0 +1,11 @@
+<div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+    <div><label for="name" class="admin-label">Name *</label><input id="name" name="name" value="{{ old('name', $category->name) }}" required maxlength="100" class="paper-input admin-input"></div>
+    <div><label for="slug" class="admin-label">URL Slug *</label><input id="slug" name="slug" value="{{ old('slug', $category->slug) }}" required maxlength="120" pattern="[a-z0-9]+(-[a-z0-9]+)*" class="paper-input admin-input"><p class="admin-help">Lowercase letters, numbers, and hyphens only.</p></div>
+    <div class="md:col-span-2"><label for="description" class="admin-label">Short Description</label><input id="description" name="description" value="{{ old('description', $category->description) }}" maxlength="255" class="paper-input admin-input"></div>
+    <div class="md:col-span-2 border-t border-gray-200 pt-5"><h2 class="font-black text-gray-900">SEO</h2><p class="admin-help mt-1">Optional search preview data for this category page.</p></div>
+    <div><label for="meta_title" class="admin-label">SEO Title</label><input id="meta_title" name="meta_title" value="{{ old('meta_title', $category->meta_title) }}" maxlength="70" class="paper-input admin-input"></div>
+    <div><label for="meta_keywords" class="admin-label">SEO Keywords</label><input id="meta_keywords" name="meta_keywords" value="{{ old('meta_keywords', $category->meta_keywords) }}" maxlength="255" class="paper-input admin-input"></div>
+    <div class="md:col-span-2"><label for="meta_description" class="admin-label">SEO Description</label><textarea id="meta_description" name="meta_description" rows="3" maxlength="160" class="paper-input admin-input resize-y">{{ old('meta_description', $category->meta_description) }}</textarea></div>
+    <label class="md:col-span-2 flex items-center gap-2 text-sm font-semibold text-gray-700"><input type="checkbox" name="is_active" value="1" @checked(old('is_active', $category->is_active)) class="accent-brandRed w-4 h-4"><span>Visible on storefront</span></label>
+    <label class="md:col-span-2 flex items-center gap-2 text-sm font-semibold text-gray-700"><input type="checkbox" name="show_on_homepage" value="1" @checked(old('show_on_homepage', $category->show_on_homepage ?? true)) class="accent-brandRed w-4 h-4"><span>Show in homepage Top Categories</span></label>
+</div>

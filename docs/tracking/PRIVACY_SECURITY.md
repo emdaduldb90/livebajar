@@ -1,0 +1,11 @@
+# Privacy and security
+
+- Existing admin auth/session and `is_admin` middleware protect all panel actions. The public event receiver is not an admin route: it is CSRF-protected, same-origin checked, rate limited and restricted to nine event names and allowlisted properties.
+- Provider credentials and OpenAI API key are Laravel encrypted casts. Public Blade configuration and the JSON backup include only identifiers and safe toggles. Do not rotate `APP_KEY` without re-encrypting these values.
+- New event records exclude raw IP, user agent, customer name/address/email/phone, full URL query/fragment and free-text search. UTM values are length/character/PII screened; analytics groups unknown sources as `other` for AI.
+- Optional checkout email and phone matching values are normalized, SHA-256 hashed and encrypted at rest. They are generated only if the consent gate passes and an admin enables matching. They are not sent to OpenAI.
+- Browser events and provider scripts honor the consent gate. When optional tracking is configured and consent is required, the storefront shows a first-party allow/reject choice for optional analytics and advertising measurement. The `livebajar_tracking_consent` cookie or `window.LiveBajarConsent.analytics=true` carries the grant; a denied cookie stops browser collection. This is a basic preference control, not a full CMP or legal review. The site owner must confirm the policy text, retention and jurisdiction-specific requirements.
+- External HTTP requests run only in queue jobs and only after the event and destination are explicitly enabled. Queue retry payloads contain delivery IDs, not provider secrets. Provider response bodies and credentials are not written to logs.
+- AI reports receive only aggregate counts, gross order value, funnel totals, and normalized campaign-source groups. Prompts explicitly treat metrics as data; raw user-controlled text is excluded. `store:false`, daily report limits and output token limits are applied.
+- Data retention is configurable from 30 to 365 days. Cleanup requires a functioning Laravel scheduler. A customer-level DSAR/export/delete workflow is not implemented because the event dataset does not store a direct customer key.
+- CSV export omits encrypted identifiers and matching hashes. Review CSVs before transferring them outside the admin team.

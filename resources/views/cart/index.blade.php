@@ -1,0 +1,29 @@
+<x-layouts.store title="Shopping Cart | Live Bajar" :tracking-context="$trackingContext">
+    @if ($summary['items']->isEmpty())
+        <div class="paper-card p-12 text-center max-w-xl mx-auto my-12 space-y-6"><div class="w-24 h-24 paper-card-inset rounded-full flex items-center justify-center text-4xl text-gray-400 mx-auto"><i class="fas fa-shopping-cart" aria-hidden="true"></i></div><h1 class="text-2xl font-black text-gray-900">Your Shopping Cart is Empty</h1><p class="text-sm text-gray-600">Looks like you haven't added any paper-crafted products to your cart yet.</p><a href="{{ route('products.index') }}" class="paper-btn px-8 py-3.5 bg-brandRed text-white font-bold rounded-xl shadow-md hover:bg-brandRedHover inline-flex items-center gap-2"><span>Start Shopping</span><i class="fas fa-arrow-right" aria-hidden="true"></i></a></div>
+    @else
+        <div class="space-y-8">
+            <h1 class="text-3xl font-black text-gray-900">Shopping Cart ({{ $summary['items']->sum('quantity') }} items)</h1>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-2 space-y-4">
+                    @foreach ($summary['items'] as $item)
+                        @php($product = $item['product'])
+                        <div class="paper-card p-4 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+                            <div class="flex items-center gap-4 w-full sm:w-auto"><a href="{{ route('products.show', $product) }}" class="w-20 h-20 aspect-square paper-card-inset bg-white overflow-hidden flex-shrink-0"><img src="{{ $product->image_url }}" alt="{{ $product->name }}" width="80" height="80" class="w-full h-full object-cover"></a><div><a href="{{ route('categories.show', ['category' => $product->category->slug]) }}" class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">{{ $product->category->name }}</a><a href="{{ route('products.show', $product) }}" class="block font-bold text-gray-800 text-sm hover:text-brandRed line-clamp-1">{{ $product->name }}</a><div class="text-brandRed font-black text-base mt-1">{{ \App\Support\Money::display($product->price_cents) }}</div></div></div>
+                            <div class="flex items-center justify-between w-full sm:w-auto gap-6">
+                                <form action="{{ route('cart.update', $product->id) }}" method="POST" class="flex items-center paper-input overflow-hidden">@csrf @method('PUT')<button name="quantity" value="{{ $item['quantity'] - 1 }}" class="px-3 py-1.5 hover:bg-black/5 font-bold text-gray-700" aria-label="Decrease quantity">-</button><span class="px-3 py-1.5 font-bold text-sm text-gray-800">{{ $item['quantity'] }}</span><button name="quantity" value="{{ $item['quantity'] + 1 }}" class="px-3 py-1.5 hover:bg-black/5 font-bold text-gray-700" aria-label="Increase quantity">+</button></form>
+                                <div class="text-right font-black text-gray-900 w-20">{{ \App\Support\Money::display($item['line_total_cents']) }}</div>
+                                <form action="{{ route('cart.destroy', $product->id) }}" method="POST">@csrf @method('DELETE')<button class="text-gray-400 hover:text-brandRed p-2 transition-colors" title="Remove item" aria-label="Remove {{ $product->name }}"><i class="fas fa-trash-can text-sm" aria-hidden="true"></i></button></form>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+                <aside class="space-y-6"><div class="paper-card p-6 space-y-6"><h2 class="font-bold text-gray-900 text-lg border-b border-gray-200 pb-4">Cart Summary</h2>
+                    <div class="space-y-2"><label for="coupon" class="text-xs font-bold text-gray-700 uppercase tracking-wider">Coupon Code</label><form action="{{ route('cart.coupon') }}" method="POST" class="flex gap-2">@csrf<input id="coupon" name="code" type="text" value="{{ $summary['coupon']?->code }}" placeholder="e.g. LIVE10" class="paper-input py-2 px-3 text-xs w-full"><button class="paper-btn px-4 py-2 bg-gray-900 text-white font-semibold text-xs rounded-xl">Apply</button></form><p class="text-[11px] text-gray-500">Try code <strong class="text-brandRed">LIVE10</strong> for 10% off!</p>@if($summary['coupon'])<form action="{{ route('cart.coupon.destroy') }}" method="POST" class="text-right">@csrf @method('DELETE')<button class="text-xs text-brandRed font-bold hover:underline">Remove coupon</button></form>@endif</div>
+                    <div class="space-y-3 pt-4 border-t border-gray-200 text-sm"><div class="flex justify-between text-gray-600"><span>Subtotal</span><span class="font-semibold text-gray-800">{{ \App\Support\Money::display($summary['subtotal_cents']) }}</span></div>@if($summary['discount_cents'] > 0)<div class="flex justify-between text-emerald-600 font-semibold"><span>Discount</span><span>-{{ \App\Support\Money::display($summary['discount_cents']) }}</span></div>@endif<div class="flex justify-between text-gray-600"><span>Estimated Shipping</span><span class="font-semibold text-gray-800">{!! $summary['shipping_cents'] === 0 ? '<span class="text-emerald-600 uppercase font-bold text-xs">Free</span>' : \App\Support\Money::display($summary['shipping_cents']) !!}</span></div><div class="flex justify-between text-lg font-black text-gray-900 pt-3 border-t border-gray-200"><span>Total</span><span class="text-brandRed">{{ \App\Support\Money::display($summary['total_cents']) }}</span></div></div>
+                    <a href="{{ route('checkout.create') }}" class="paper-btn w-full py-4 bg-brandRed text-white font-bold rounded-xl shadow-lg hover:bg-brandRedHover flex items-center justify-center gap-2"><span>Proceed to Checkout</span><i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+                </div></aside>
+            </div>
+        </div>
+    @endif
+</x-layouts.store>
